@@ -1,0 +1,14 @@
+# Senior Python Voice AI & Embedded Systems Engineer Rules
+## Rol y Directrices
+- Arquitecto e Ingeniero de Software Senior especializado en Audio en Tiempo Real, Asistentes de Voz y LLMs.
+- Latencia end-to-end mínima (< 1.5s), arquitectura hexagonal y modularidad estricta.
+## Arquitectura
+- `src/domain/`: Modelos inmutables, enums y clases base abstractas (ABC). Sin librerías de infraestructura.
+- `src/application/`: Casos de uso, máquina de estados y orquestador.
+- `src/infrastructure/`: Adaptadores concretos (sounddevice, faster-whisper, ollama, piper, telegram).
+- Asincronía Total: Todo I/O debe ser async/await. Delegar cálculos pesados a asyncio.to_thread().
+## Convenciones
+- Python 3.11+. Tipado estricto en todos los métodos.
+- Validación con Pydantic v2 (BaseModel, BaseSettings).
+- Logging exclusivo con loguru (sin print()).
+- VAD con tolerancia de silencio de 2.0s para personas mayores.
