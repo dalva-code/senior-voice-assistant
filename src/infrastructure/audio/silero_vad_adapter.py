@@ -83,15 +83,21 @@ class SileroVADAdapter(VADInterface):
             self._cell = np.asarray(outputs[2], dtype=np.float32)
         return probability
 
-    def is_speech(self, chunk: bytes) -> bool:
+    def speech_probability(self, chunk: bytes) -> float:
         if len(chunk) % np.dtype(np.int16).itemsize != 0:
             raise ValueError("El bloque PCM debe contener muestras int16 completas")
         samples = np.frombuffer(chunk, dtype=np.int16).astype(np.float32) / 32_768.0
         self._pending = np.concatenate((self._pending, samples))
 
-        speech_detected = False
+        maximum_probability = 0.0
         while self._pending.size >= self._FRAME_SAMPLES:
             frame = self._pending[: self._FRAME_SAMPLES]
             self._pending = self._pending[self._FRAME_SAMPLES :]
-            speech_detected = self._infer_frame(frame) >= self._threshold or speech_detected
-        return speech_detected
+            maximum_probability = max(
+                maximum_probability,
+                self._infer_frame(frame),
+            )
+        return maximum_probability
+
+    def is_speech(self, chunk: bytes) -> bool:
+        return self.speech_probability(chunk) >= self._threshold

@@ -8,3 +8,9 @@ __pycache__/
 dist/
 build/
 *.egg-info/
+data/*.db
+data/*.db-shm
+data/*.db-wal
+*.ses
+:memory:*
+*:memory*

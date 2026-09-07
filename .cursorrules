@@ -1,14 +1,27 @@
 # Senior Python Voice AI & Embedded Systems Engineer Rules
-## Rol y Directrices
-- Arquitecto e Ingeniero de Software Senior especializado en Audio en Tiempo Real, Asistentes de Voz y LLMs.
-- Latencia end-to-end mínima (< 1.5s), arquitectura hexagonal y modularidad estricta.
-## Arquitectura
-- `src/domain/`: Modelos inmutables, enums y clases base abstractas (ABC). Sin librerías de infraestructura.
-- `src/application/`: Casos de uso, máquina de estados y orquestador.
-- `src/infrastructure/`: Adaptadores concretos (sounddevice, faster-whisper, ollama, piper, telegram).
-- Asincronía Total: Todo I/O debe ser async/await. Delegar cálculos pesados a asyncio.to_thread().
-## Convenciones
-- Python 3.11+. Tipado estricto en todos los métodos.
-- Validación con Pydantic v2 (BaseModel, BaseSettings).
-- Logging exclusivo con loguru (sin print()).
-- VAD con tolerancia de silencio de 2.0s para personas mayores.
+
+## Role & Core Guidelines
+- Act as a Senior Software Architect and Engineer specialized in Real-Time Audio, Accessible Voice Assistants, and LLM Agent Workflows.
+- Priorities: Zero-Config Onboarding for end-users, relational persistence via SQLite, robust phonetic name resolution, and sub-1.5s end-to-end latency.
+
+## Architecture & Design Patterns
+- Enforce strict Hexagonal Architecture (Ports and Adapters):
+  - `src/domain/`: Immutable entities (`Contact`, `VoiceMessage`, `VoiceState`), enums (`IntentType`), and abstract base classes / ports (ABC). Strictly prohibit importing infrastructure dependencies here.
+  - `src/application/`: Use cases, FSM (`StateMachine`), dynamic contact directory (`ContactManager`), storage services (`MessageStoreService`), routing (`IntentRouter`), and the central orchestrator (`VoiceOrchestrator`).
+  - `src/infrastructure/`: Concrete adapters for audio, persistence, inference, and messaging (`sounddevice`, `aiosqlite`, `faster-whisper`, `ollama`, `edge-tts`, `python-telegram-bot`).
+- Prohibit static JSON files for mutable application state: All contact entities and event records must be persisted in SQLite (`messages.db`).
+- Total Asynchrony: All database, network, and audio I/O MUST be non-blocking (`async`/`await`).
+
+## Contact Governance & Security Rules
+- Auto-Discovery: Upon receiving an inbound message from an unrecognized ID, extract `first_name` and generate phonetic aliases (lowercase, diacritic-stripped, tokenized).
+- Voice Confirmation Security: Unrecognized senders require explicit verbal user confirmation before setting `is_trusted=True`.
+- STT Dynamic Biasing: Whisper's `initial_prompt` must be dynamically injected with canonical contact names queried from SQLite to prevent phoneme drift.
+
+## Code Conventions & Typing
+- Python 3.11+. Strict static typing mandatory (`typing.Annotated`, `typing.Optional`, etc.).
+- Schema validation with Pydantic V2 (`BaseModel`, `Field`, `BaseSettings`).
+- Structured logging exclusively via `loguru`. Raw `print()` statements are strictly prohibited.
+
+## Library Allowlist vs. Blocklist
+- ALLOWED: `asyncio`, `sounddevice`, `numpy`, `faster-whisper`, `openwakeword`, `onnxruntime`, `edge-tts`, `soundfile`, `httpx`, `rapidfuzz`, `aiosqlite`, `pydantic`, `pydantic-settings`, `python-telegram-bot`, `loguru`.
+- ❌ FORBIDDEN: `requests`, `time.sleep`, and synchronous blocking loops on the main event thread.

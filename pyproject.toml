@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "Asistente de voz local de baja latencia para personas mayores"
 requires-python = ">=3.11"
 dependencies = [
+    "aiosqlite>=0.20.0",
+    "edge-tts>=6.1.0",
+    "faster-whisper>=1.0.0",
     "httpx",
     "loguru",
     "numpy",
@@ -15,6 +18,9 @@ dependencies = [
     "openwakeword",
     "pydantic>=2.0",
     "pydantic-settings",
+    "python-telegram-bot[job-queue]>=21.0",
+    "rapidfuzz>=3.6.0",
+    "soundfile>=0.12.0",
     "sounddevice",
 ]
 
